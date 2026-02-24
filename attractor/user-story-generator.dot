@@ -1,0 +1,133 @@
+digraph UserStoryGenerator {
+    graph [
+        goal="Create 10-12 genuine user stories from the perspective of an expat planning trips back to their home country",
+        budget="10",
+        retry_target="empathize",
+        model_stylesheet="
+            * { llm_provider: anthropic; llm_model: claude-opus-4-5; }
+            .thinking { llm_provider: openai; llm_model: gpt-5.2; reasoning_effort: high; }
+        "
+    ]
+
+    start [shape=Mdiamond]
+    exit  [shape=Msquare]
+
+    context [
+        prompt="Read the project files to understand what we're building:
+- README.md
+- AGENTS.md
+
+Summarize in 2-3 sentences: what is this app and who is it for?"
+    ]
+
+    empathize [
+        class="thinking",
+        prompt="You live in Costa Rica. You're American, and you go back to the US 2-3 times a year.
+Every trip is a chance to stock up on stuff you can't get here, or that costs way too much.
+
+Think about your life:
+- You're browsing Amazon and see something cool - but shipping to CR is $40 or doesn't exist
+- You're at Costco in the US with a cart full of vitamins, protein bars, that one hot sauce
+- You're trying to remember: did I already buy new running shoes last trip?
+- Your suitcase is 52 lbs and the limit is 50
+- Your friend asks you to bring them something
+
+Think about the feelings:
+- The satisfaction of a well-planned trip where you got everything
+- The frustration of forgetting something you meant to buy
+- The mental load of tracking 'things to get next time I'm in the States'
+- Arriving home with exactly what you needed
+
+Write a short narrative (3-4 paragraphs) about this person's relationship with travel and shopping.
+What would make their life easier? What's annoying right now?"
+    ]
+
+    needs [
+        class="thinking",
+        prompt="Based on the expat narrative, identify 10-12 concrete things they want to DO.
+
+Rules:
+- Each need must be something you'd say to a friend ('I wish I could...')
+- No app jargon (no 'dashboard', 'sync', 'real-time')
+- Focus on the moments: adding something to the list, packing, shopping, returning home
+
+Good examples:
+- 'Quickly jot down something I want to buy next trip'
+- 'See everything I need to get at Costco in one place'
+- 'Know if my bag is going to be overweight before I pack'
+- 'Remember what I bought last trip so I don't overbuy'
+- 'Keep track of stuff friends asked me to bring'
+
+Bad examples (reject these):
+- 'Manage my shopping inventory' (jargon)
+- 'Synchronize across devices' (technical)
+- 'Access my data offline' (feature, not need)
+
+Output a numbered list of 10-12 human needs."
+    ]
+
+    draft [
+        prompt="Convert each human need into a user story.
+
+Format:
+**[Short title]**
+As an expat, I want to [need] so that [why it matters to me personally].
+
+Acceptance criteria (2-4 bullets):
+- Things I could check by using the app
+- Written like I'm describing it to a friend
+
+Keep it personal. 'I can see my Costco list' not 'shopping list displays correctly'.
+
+Output all 10-12 stories."
+    ]
+
+    reality_check [
+        class="thinking",
+        prompt="Reality check each user story. For each one, ask:
+
+1. Is this something I'd actually complain about to a friend over beers?
+2. Does it describe MY problem, or describe an app feature?
+3. Would I be excited if someone said 'I built this for you'?
+
+If a story sounds like a product spec instead of a human frustration, it fails.
+
+Mark each story as PASS or FAIL with a brief reason.
+If more than 2 stories fail, say NEEDS_REVISION and explain what's wrong.
+If 10+ stories pass, say VALIDATED and list the passing stories."
+    ]
+
+    gate [shape=diamond, label="Stories human enough?"]
+
+    check_existing [
+        prompt="Check how many open issues exist:
+gh issue list --repo pagerguild/travel-planner --state open --json number --jq 'length'
+
+If 10 or more exist, say STOP.
+Otherwise say CONTINUE."
+    ]
+
+    create_gate [shape=diamond, label="Room for issues?"]
+
+    publish [
+        prompt="Create GitHub issues for the validated user stories.
+
+For each story, create one issue:
+gh issue create --repo pagerguild/travel-planner --title 'TITLE' --body 'BODY' --label 'user-story'
+
+If the label doesn't exist, create it first:
+gh label create user-story --repo pagerguild/travel-planner --description 'User story' --color 0E8A16
+
+Stop if you've created 12 issues total.
+
+List the URLs of created issues when done."
+    ]
+
+    start -> context -> empathize -> needs -> draft -> reality_check -> gate
+    gate -> check_existing [condition="outcome=success"]
+    gate -> empathize [condition="outcome!=success"]
+    check_existing -> create_gate
+    create_gate -> publish [condition="outcome=success"]
+    create_gate -> exit [condition="outcome!=success"]
+    publish -> exit
+}
