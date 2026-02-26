@@ -8,7 +8,13 @@
 	let items = $state<WishlistItem[]>([]);
 
 	function dbToItem(row: DbWishlistItem): WishlistItem {
-		return parseWishlistItem(row.description);
+		const item = parseWishlistItem(row.description);
+		item.id = row.id;
+		item.status = row.status ?? 'want';
+		item.actual_price = row.actual_price ?? undefined;
+		item.weight_g = row.weight_g ?? undefined;
+		item.created_at = new Date(row.created_at).getTime();
+		return item;
 	}
 
 	onMount(async () => {
@@ -34,7 +40,7 @@
 		// Persist to Supabase
 		const { error: dbError } = await supabase
 			.from('wishlist_items')
-			.insert({ description: item.description });
+			.insert({ description: item.description, status: 'want' });
 		if (dbError) {
 			error = 'Failed to save item. Please try again.';
 			// Roll back optimistic update

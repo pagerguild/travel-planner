@@ -1,10 +1,14 @@
+export type ItemStatus = 'want' | 'purchased' | 'packed';
+
 export type WishlistItem = {
 	id: string;
 	description: string;
 	created_at: number;
 	// Derived client-side from description
 	name: string;
-	status: 'want' | 'purchased' | 'packed';
+	status: ItemStatus;
+	actual_price?: number;
+	weight_g?: number;
 };
 
 /**
@@ -27,4 +31,9 @@ export function parseWishlistItem(raw: string): WishlistItem {
 		status: 'want',
 		created_at: Date.now()
 	};
+}
+
+/** Format a price in USD cents as a dollar string, e.g. 1999 → "$19.99" */
+export function formatPrice(cents: number): string {
+	return `$${(cents / 100).toFixed(2)}`;
 }

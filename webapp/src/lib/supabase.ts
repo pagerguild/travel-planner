@@ -7,4 +7,7 @@ export type DbWishlistItem = {
 	id: string;
 	description: string;
 	created_at: string;
+	status: 'want' | 'purchased' | 'packed';
+	actual_price: number | null;
+	weight_g: number | null;
 };
