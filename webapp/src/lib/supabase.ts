@@ -6,5 +6,6 @@ export const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLIS
 export type DbWishlistItem = {
 	id: string;
 	description: string;
+	status: 'want' | 'purchased' | 'packed';
 	created_at: string;
 };
