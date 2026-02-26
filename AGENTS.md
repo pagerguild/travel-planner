@@ -22,7 +22,7 @@ travel-planner/
 - **Framework**: SvelteKit
 - **Backend**: Supabase (PostgreSQL, Auth, Realtime)
 - **Styling**: Tailwind CSS
-- **Language**: TypeScript
+- Runtime: Bun
 
 ## Development Commands
 
