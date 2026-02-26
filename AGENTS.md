@@ -24,13 +24,16 @@ travel-planner/
 - **Styling**: Tailwind CSS
 - Runtime: Bun
 
+## Testing
+
+1. Make sure migrations have been run; run them if needed.
+2. Use tests where needed against the database.
+
 ## Database
 
 Use the supabase CLI to run migrations.
-SUPABASE_DB_PASSWORD is in the .env
+SUPABASE_DB_PASSWORD is in the .env, along with
+PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY and PUBLIC_SUPABASE_URL
 
-Connect to the application for RLS-enabled queries using the following:
-
-PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY="sb_publishable_ML8nknFZvpn3eB08yyLLjg_ENOjarGV"
-PUBLIC_SUPABASE_URL="https://iqunclrwzxulzyuzgcgl.supabase.co"
+RLS is enabled on all tables and must be used.
 
